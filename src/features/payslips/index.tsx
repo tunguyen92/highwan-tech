@@ -32,7 +32,7 @@ export function Payslips() {
           </div>
           <PayslipsPrimaryButtons />
         </div>
-        <PayslipsTable data={payslips} />
+        {/* <PayslipsTable data={payslips} /> */}
       </Main>
 
       <PayslipsDialogs />
