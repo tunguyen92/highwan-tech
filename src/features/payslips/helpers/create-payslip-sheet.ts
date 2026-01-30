@@ -160,6 +160,7 @@ export const exportSalarySlip = async (
   sheet.getCell('E44').value = employee['Họ và tên']
 
   const excelBuffer = await workbook.xlsx.writeBuffer()
-  const fileName = `Phiếu lương ${employee['Họ và tên']}_${employee.month}/${employee.year}.xlsx`
+  const rawFileName = `Phiếu lương ${employee['Họ và tên']}_${currMonthStr}-${currYearStr}.xlsx`
+  const fileName = rawFileName.replace(/[\\/:*?"<>|]/g, '-')
   return { buffer: excelBuffer, fileName }
 }
