@@ -1,4 +1,4 @@
-import { Download, Plus } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { usePayslips } from './payslips-provider'
 
@@ -13,9 +13,9 @@ export function PayslipsPrimaryButtons() {
       >
         <span>Import</span> <Download size={18} />
       </Button>
-      <Button className='space-x-1' onClick={() => setOpen('create')}>
+      {/* <Button className='space-x-1' onClick={() => setOpen('create')}>
         <span>Create</span> <Plus size={18} />
-      </Button>
+      </Button> */}
     </div>
   )
 }
