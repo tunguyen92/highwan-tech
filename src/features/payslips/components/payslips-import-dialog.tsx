@@ -77,14 +77,12 @@ export function PayslipsImportDialog({
 
       const sheetName = workbook.SheetNames[0]
       const worksheet = workbook.Sheets[sheetName]
-      // Ensure headers with empty cells are kept and set to '-' instead of being omitted
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '-' }) as PayslipData[]
+      // Ensure headers with empty cells are kept and set to 0 instead of being omitted
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        defval: 0,
+      }) as PayslipData[]
 
-      exportPayslipZip({
-        data: jsonData,
-        zipName: 'March_Payslips',
-        filePrefix: 'Payslip',
-      })
+      exportPayslipZip({ data: jsonData })
     }
 
     reader.readAsArrayBuffer(file[0])
