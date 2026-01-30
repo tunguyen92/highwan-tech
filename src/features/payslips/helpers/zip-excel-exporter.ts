@@ -15,23 +15,19 @@ export async function exportPayslipZip({
 
   const zip = new JSZip()
 
-  try {
-    for (const item of data) {
-      const result = await exportSalarySlip(item)
-      const buf = result.buffer
-      const uint8 = buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf
+  for (const item of data) {
+    const result = await exportSalarySlip(item)
+    const buf = result.buffer
+    const uint8 = buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf
 
-      zip.file(result.fileName, uint8, { binary: true })
-    }
-
-    const blob = await zip.generateAsync({
-      type: 'blob',
-      compression: 'DEFLATE',
-      compressionOptions: { level: 6 },
-    })
-
-    saveAs(blob, `Phiếu lương_${new Date().toLocaleDateString('vi-VN')}.zip`)
-  } catch (err) {
-    throw err
+    zip.file(result.fileName, uint8, { binary: true })
   }
+
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  })
+
+  saveAs(blob, `Phiếu lương_${new Date().toLocaleDateString('vi-VN')}.zip`)
 }
