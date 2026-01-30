@@ -55,7 +55,7 @@ export interface PayslipData {
 }
 
 export const exportSalarySlip = async (
-  employee: any
+  employee: PayslipData
 ): Promise<{
   buffer: ArrayBuffer | Uint8Array
   fileName: string

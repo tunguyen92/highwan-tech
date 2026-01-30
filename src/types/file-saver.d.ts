@@ -1,3 +1,8 @@
 declare module 'file-saver' {
-  export function saveAs(data: BlobPart, filename?: string, options?: any): void
+  export type SaveAsOptions = Record<string, unknown>
+  export function saveAs(
+    data: BlobPart,
+    filename?: string,
+    options?: SaveAsOptions
+  ): void
 }

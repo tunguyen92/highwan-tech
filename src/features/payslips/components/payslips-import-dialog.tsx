@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { PayslipData } from '../helpers/create-payslip-sheet'
+import type { PayslipData } from '../helpers/create-payslip-sheet'
 import { exportPayslipZip } from '../helpers/zip-excel-exporter'
 
 const formSchema = z.object({
@@ -63,8 +63,6 @@ export function PayslipsImportDialog({
     const file = form.getValues('file')
     if (!file || file.length === 0) return
 
-    // onOpenChange(false)
-
     const reader = new FileReader()
 
     reader.onload = () => {
@@ -85,6 +83,8 @@ export function PayslipsImportDialog({
     }
 
     reader.readAsArrayBuffer(file[0])
+
+    onOpenChange(false)
   }
 
   return (

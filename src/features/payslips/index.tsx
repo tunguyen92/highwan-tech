@@ -7,8 +7,6 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { PayslipsDialogs } from './components/payslips-dialogs'
 import { PayslipsPrimaryButtons } from './components/payslips-primary-buttons'
 import { PayslipsProvider } from './components/payslips-provider'
-import { PayslipsTable } from './components/payslips-table'
-import { payslips } from './data/payslips'
 
 export function Payslips() {
   return (

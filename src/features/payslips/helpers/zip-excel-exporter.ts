@@ -1,6 +1,6 @@
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
-import { exportSalarySlip, PayslipData } from './create-payslip-sheet'
+import { exportSalarySlip, type PayslipData } from './create-payslip-sheet'
 
 interface ExportPayslipZipOptions {
   data: PayslipData[]
@@ -32,7 +32,6 @@ export async function exportPayslipZip({
 
     saveAs(blob, `Phiếu lương_${new Date().toLocaleDateString('vi-VN')}.zip`)
   } catch (err) {
-    console.error('Failed to export payslips ZIP', err)
     throw err
   }
 }
