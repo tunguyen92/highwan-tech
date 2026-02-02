@@ -24,7 +24,6 @@ export interface PayslipData {
   'BHXH 8%': number
   'BHYT 1.5%': number
   'BHTN 1%': number
-  'Công đoàn': number
   'Số ngày làm việc trong tháng': number
   'Số ngày làm việc thực tế (ngày)': number
   'Số ngày tăng ca/2 tiếng': number
@@ -47,127 +46,142 @@ export interface PayslipData {
   'BẢN THÂN VÀ NGƯỜI PHỤ THUỘC (4.400.000/1 NGƯỜI)': number
   'THU NHẬP CHỊU THUẾ': number
   'THU NHẬP TÍNH THUẾ': number
-  'THUẾ TNCN': number
   'Tổng BHXH': number
+  'Công đoàn': number | null
+  'THUẾ TNCN': number
   'Tổng lương thực lãnh': number
   month: string
   year: string
 }
 
+/* ---------------------------------- */
+/* Row engine                          */
+/* ---------------------------------- */
+
+type CellValue = keyof PayslipData | ((e: PayslipData) => number | string)
+
+interface RowConfig {
+  col: string
+  value: CellValue
+}
+
+function fillSection(
+  sheet: ExcelJS.Worksheet,
+  employee: PayslipData,
+  startRow: number,
+  rows: RowConfig[]
+) {
+  let row = startRow
+
+  rows.forEach(({ col, value }) => {
+    const cellValue =
+      typeof value === 'function' ? value(employee) : employee[value]
+
+    sheet.getCell(`${col}${row}`).value = cellValue
+    row++
+  })
+}
+
+/* ---------------------------------- */
+/* Section definitions                 */
+/* ---------------------------------- */
+
+const SALARY_ROWS: RowConfig[] = [
+  { col: 'E', value: 'Số ngày làm việc trong tháng' },
+  { col: 'E', value: 'Nghỉ lễ, kết hôn, tang chế' },
+  { col: 'E', value: 'Nghỉ phép năm' },
+  { col: 'E', value: 'Nghỉ ốm, Thai sản' },
+  { col: 'E', value: 'Nghỉ không lương' },
+  { col: 'E', value: 'Số ngày làm việc thực tế (ngày)' },
+  { col: 'E', value: 'Tăng ca 150%/ OT 150%' },
+  { col: 'E', value: 'Tăng ca 200%/ OT 200%' },
+  { col: 'E', value: 'Tăng ca 300%/ OT 300%' },
+  { col: 'E', value: 'Tăng ca 210%/ OT 210%' },
+  { col: 'E', value: 'Tăng ca 270%/ OT 270%' },
+  { col: 'E', value: 'Tăng ca 390%/ OT 390%' },
+  { col: 'E', value: 'Lương cơ bản' },
+  { col: 'E', value: 'Hỗ trợ xăng xe, nhà ở' },
+  {
+    col: 'E',
+    value: (e) =>
+      ((e['Lương cơ bản'] + e['Hỗ trợ xăng xe, nhà ở']) *
+        e['Số ngày làm việc thực tế (ngày)']) /
+      e['Số ngày làm việc trong tháng'],
+  },
+]
+
+const ALLOWANCE_ROWS: RowConfig[] = [
+  { col: 'E', value: 'Tiền điện thoại' },
+  { col: 'E', value: 'Tổng tiền tăng ca' },
+  { col: 'E', value: 'Tổng tiền cơm tăng ca' },
+  { col: 'E', value: 'Tổng tiền cơm trưa' },
+  { col: 'E', value: 'Monthly Off Fee (1 Day)' },
+  { col: 'E', value: 'National Holiday Fee' },
+  { col: 'E', value: 'Processing Fee' },
+  { col: 'E', value: 'Thưởng tết 2026 (Bonus 2026)' },
+  {
+    col: 'E',
+    value: (e) =>
+      e['Tiền điện thoại'] +
+      e['Tổng tiền tăng ca'] +
+      e['Tổng tiền cơm tăng ca'] +
+      e['Tổng tiền cơm trưa'] +
+      e['Monthly Off Fee (1 Day)'] +
+      e['National Holiday Fee'] +
+      e['Processing Fee'] +
+      e['Thưởng tết 2026 (Bonus 2026)'],
+  },
+]
+
+const DEDUCTION_ROWS: RowConfig[] = [
+  { col: 'E', value: 'Tổng BHXH' },
+  { col: 'E', value: 'Công đoàn' },
+  { col: 'E', value: 'THUẾ TNCN' },
+  {
+    col: 'E',
+    value: (e) => e['Tổng BHXH'] + e['THUẾ TNCN'],
+  },
+  { col: 'E', value: 'Tổng lương thực lãnh' },
+]
+
+/* ---------------------------------- */
+/* Export function                     */
+/* ---------------------------------- */
+
 export const exportSalarySlip = async (
   employee: PayslipData
-): Promise<{
-  buffer: ArrayBuffer | Uint8Array
-  fileName: string
-}> => {
+): Promise<{ buffer: ArrayBuffer | Uint8Array; fileName: string }> => {
   const workbook = new ExcelJS.Workbook()
 
-  // Load template
-  const url = '/documents/payslip.xlsx'
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch payslip template ${url}: ${response.status} ${response.statusText}`
-    )
-  }
+  const response = await fetch('/documents/payslip.xlsx')
+  if (!response.ok) throw new Error('Payslip template not found')
 
-  const contentType = response.headers.get('content-type') || ''
-  if (contentType.includes('text/html')) {
-    throw new Error(
-      `Payslip template fetch returned HTML (likely 404). URL: ${url}`
-    )
-  }
+  await workbook.xlsx.load(await response.arrayBuffer())
 
-  const buffer = await response.arrayBuffer()
-  try {
-    await workbook.xlsx.load(buffer)
-  } catch (err) {
-    throw new Error(
-      `Failed to load template as XLSX — ensure ${url} exists and is a valid .xlsx file: ${err}`
-    )
-  }
+  const sheet = workbook.getWorksheet(1)
+  if (!sheet) throw new Error('Worksheet missing')
 
-  const sheet = workbook.getWorksheet(1) // first sheet
+  const month = String(employee.month).padStart(2, '0')
+  const year = employee.year
 
-  if (!sheet) {
-    throw new Error(
-      'Payslip template worksheet not found (expected first sheet)'
-    )
-  }
-
-  // FILL DATA INTO EXACT CELLS
-  const monthNum = parseInt(String(employee.month), 10)
-  const yearNum = parseInt(String(employee.year), 10)
-  const currMonthStr = String(monthNum).padStart(2, '0')
-  const currYearStr = String(yearNum)
-
-  const currentDate = new Date(yearNum, Math.max(0, monthNum - 1))
-  const prevDate = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() - 1
-  )
-  const prevMonthStr = String(prevDate.getMonth() + 1).padStart(2, '0')
-  const prevYearStr = String(prevDate.getFullYear())
-
-  sheet.getCell('C2').value =
-    `BẢNG LƯƠNG CÁ NHÂN THÁNG ${currMonthStr}/${currYearStr}`
-  sheet.getCell('C3').value =
-    `Từ 26/${prevMonthStr}/${prevYearStr} đến 25/${currMonthStr}/${currYearStr}`
+  sheet.getCell('C2').value = `BẢNG LƯƠNG CÁ NHÂN THÁNG ${month}/${year}`
   sheet.getCell('D4').value = employee['Họ và tên']
   sheet.getCell('D5').value = employee['Ngày sinh']
   sheet.getCell('D6').value = employee['Chức vụ']
-  sheet.getCell('D7').value = employee['STT']
+  sheet.getCell('D7').value = employee.STT
 
-  sheet.getCell('E10').value = employee['Số ngày làm việc trong tháng']
-  sheet.getCell('E11').value = employee['Nghỉ lễ, kết hôn, tang chế']
-  sheet.getCell('E12').value = employee['Nghỉ phép năm']
-  sheet.getCell('E13').value = employee['Nghỉ ốm, Thai sản']
-  sheet.getCell('E14').value = employee['Nghỉ không lương']
-  sheet.getCell('E15').value = employee['Số ngày làm việc thực tế (ngày)']
-  sheet.getCell('E16').value = employee['Tăng ca 150%/ OT 150%']
-  sheet.getCell('E17').value = employee['Tăng ca 200%/ OT 200%']
-  sheet.getCell('E18').value = employee['Tăng ca 300%/ OT 300%']
-  sheet.getCell('E19').value = employee['Tăng ca 210%/ OT 210%']
-  sheet.getCell('E20').value = employee['Tăng ca 270%/ OT 270%']
-  sheet.getCell('E21').value = employee['Tăng ca 390%/ OT 390%']
-  sheet.getCell('E22').value = employee['Lương cơ bản']
-  sheet.getCell('E23').value = employee['Hỗ trợ xăng xe, nhà ở']
-  sheet.getCell('E24').value =
-    ((Number(employee['Lương cơ bản']) +
-      Number(employee['Hỗ trợ xăng xe, nhà ở'])) *
-      Number(employee['Số ngày làm việc thực tế (ngày)'])) /
-    Number(employee['Số ngày làm việc trong tháng'])
-
-  sheet.getCell('E26').value = employee['Tiền điện thoại']
-  sheet.getCell('E27').value = employee['Tổng tiền tăng ca']
-  sheet.getCell('E28').value = employee['Tổng tiền cơm tăng ca']
-  sheet.getCell('E29').value = employee['Tổng tiền cơm trưa']
-  sheet.getCell('E30').value = employee['Monthly Off Fee (1 Day)']
-  sheet.getCell('E31').value = employee['National Holiday Fee']
-  sheet.getCell('E32').value = employee['Processing Fee']
-  sheet.getCell('E33').value = employee['Thưởng tết 2026 (Bonus 2026)']
-  sheet.getCell('E34').value =
-    Number(employee['Tiền điện thoại']) +
-    Number(employee['Tổng tiền tăng ca']) +
-    Number(employee['Tổng tiền cơm tăng ca']) +
-    Number(employee['Tổng tiền cơm trưa']) +
-    Number(employee['Monthly Off Fee (1 Day)']) +
-    Number(employee['National Holiday Fee']) +
-    Number(employee['Processing Fee']) +
-    Number(employee['Thưởng tết 2026 (Bonus 2026)'])
-
-  sheet.getCell('E36').value = employee['Tổng BHXH']
-  sheet.getCell('E37').value = 0
-  sheet.getCell('E38').value = employee['THUẾ TNCN']
-  sheet.getCell('E39').value =
-    Number(employee['Tổng BHXH']) + Number(employee['THUẾ TNCN'])
-
-  sheet.getCell('E40').value = employee['Tổng lương thực lãnh']
+  fillSection(sheet, employee, 10, SALARY_ROWS)
+  fillSection(sheet, employee, 26, ALLOWANCE_ROWS)
+  fillSection(sheet, employee, 36, DEDUCTION_ROWS)
 
   sheet.getCell('E46').value = employee['Họ và tên']
 
-  const excelBuffer = await workbook.xlsx.writeBuffer()
-  const rawFileName = `Phiếu lương ${employee['Họ và tên']}_${currMonthStr}-${currYearStr}.xlsx`
-  const fileName = rawFileName.replace(/[\\/:*?"<>|]/g, '-')
-  return { buffer: excelBuffer, fileName }
+  const buffer = await workbook.xlsx.writeBuffer()
+  const fileName =
+    `Phiếu lương ${employee['Họ và tên']}_${month}-${year}.xlsx`.replace(
+      /[\\/:*?"<>|]/g,
+      '-'
+    )
+
+  return { buffer, fileName }
 }
