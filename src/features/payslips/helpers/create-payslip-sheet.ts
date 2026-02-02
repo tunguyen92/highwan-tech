@@ -38,7 +38,7 @@ export interface PayslipData {
   'Tổng tiền tăng ca': number
   'Tổng tiền cơm tăng ca': number
   'Tiền điện thoại': number
-  'National Holiday Fee (2 Day)': number
+  'National Holiday Fee': number
   'Monthly Off Fee (1 Day)': number
   'Processing Fee': number
   'Thưởng tết 2026 (Bonus 2026)': number
@@ -133,31 +133,38 @@ export const exportSalarySlip = async (
   sheet.getCell('E22').value = employee['Lương cơ bản']
   sheet.getCell('E23').value = employee['Hỗ trợ xăng xe, nhà ở']
   sheet.getCell('E24').value =
-    Number(employee['Lương cơ bản']) + Number(employee['Hỗ trợ xăng xe, nhà ở'])
+    ((Number(employee['Lương cơ bản']) +
+      Number(employee['Hỗ trợ xăng xe, nhà ở'])) *
+      Number(employee['Số ngày làm việc thực tế (ngày)'])) /
+    Number(employee['Số ngày làm việc trong tháng'])
 
   sheet.getCell('E26').value = employee['Tiền điện thoại']
   sheet.getCell('E27').value = employee['Tổng tiền tăng ca']
   sheet.getCell('E28').value = employee['Tổng tiền cơm tăng ca']
   sheet.getCell('E29').value = employee['Tổng tiền cơm trưa']
-  sheet.getCell('E30').value = employee['Processing Fee']
-  sheet.getCell('E31').value = employee['Thưởng tết 2026 (Bonus 2026)']
-  sheet.getCell('E32').value =
+  sheet.getCell('E30').value = employee['Monthly Off Fee (1 Day)']
+  sheet.getCell('E31').value = employee['National Holiday Fee']
+  sheet.getCell('E32').value = employee['Processing Fee']
+  sheet.getCell('E33').value = employee['Thưởng tết 2026 (Bonus 2026)']
+  sheet.getCell('E34').value =
     Number(employee['Tiền điện thoại']) +
     Number(employee['Tổng tiền tăng ca']) +
     Number(employee['Tổng tiền cơm tăng ca']) +
     Number(employee['Tổng tiền cơm trưa']) +
+    Number(employee['Monthly Off Fee (1 Day)']) +
+    Number(employee['National Holiday Fee']) +
     Number(employee['Processing Fee']) +
     Number(employee['Thưởng tết 2026 (Bonus 2026)'])
 
-  sheet.getCell('E34').value = employee['Tổng BHXH']
-  sheet.getCell('E35').value = 0
-  sheet.getCell('E36').value = employee['THUẾ TNCN']
-  sheet.getCell('E37').value =
+  sheet.getCell('E36').value = employee['Tổng BHXH']
+  sheet.getCell('E37').value = 0
+  sheet.getCell('E38').value = employee['THUẾ TNCN']
+  sheet.getCell('E39').value =
     Number(employee['Tổng BHXH']) + Number(employee['THUẾ TNCN'])
 
-  sheet.getCell('E38').value = employee['Tổng lương thực lãnh']
+  sheet.getCell('E40').value = employee['Tổng lương thực lãnh']
 
-  sheet.getCell('E44').value = employee['Họ và tên']
+  sheet.getCell('E46').value = employee['Họ và tên']
 
   const excelBuffer = await workbook.xlsx.writeBuffer()
   const rawFileName = `Phiếu lương ${employee['Họ và tên']}_${currMonthStr}-${currYearStr}.xlsx`

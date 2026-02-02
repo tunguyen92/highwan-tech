@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -59,17 +60,28 @@ export function PayslipsImportDialog({
 
   const fileRef = form.register('file')
 
-  const onSubmit = () => {
+  const [loading, setLoading] = useState(false)
+
+  const readFileAsync = (file: File) =>
+    new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result
+        if (!result) return resolve(new ArrayBuffer(0))
+        resolve(result as ArrayBuffer)
+      }
+      reader.onerror = () => reject(reader.error)
+      reader.readAsArrayBuffer(file)
+    })
+
+  const onSubmit = async () => {
     const file = form.getValues('file')
     if (!file || file.length === 0) return
 
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      const result = reader.result
-      if (!result) return
-
-      const data = new Uint8Array(result as ArrayBuffer)
+    setLoading(true)
+    try {
+      const arrayBuffer = await readFileAsync(file[0])
+      const data = new Uint8Array(arrayBuffer)
       const workbook = XLSX.read(data, { type: 'array' })
 
       const sheetName = workbook.SheetNames[0]
@@ -79,12 +91,15 @@ export function PayslipsImportDialog({
         defval: 0,
       }) as PayslipData[]
 
-      exportPayslipZip({ data: jsonData })
+      await exportPayslipZip({ data: jsonData })
+    } catch (err) {
+      // keep simple: log and continue; caller can surface UI errors later
+      // eslint-disable-next-line no-console
+      console.error(err)
+    } finally {
+      setLoading(false)
+      onOpenChange(false)
     }
-
-    reader.readAsArrayBuffer(file[0])
-
-    onOpenChange(false)
   }
 
   return (
@@ -126,10 +141,17 @@ export function PayslipsImportDialog({
         </Form>
         <DialogFooter className='gap-2'>
           <DialogClose asChild>
-            <Button variant='outline'>Close</Button>
+            <Button variant='outline' disabled={loading}>
+              Close
+            </Button>
           </DialogClose>
-          <Button type='submit' form='payslip-import-form'>
-            Export
+          <Button
+            type='submit'
+            form='payslip-import-form'
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading ? 'Exporting...' : 'Export'}
           </Button>
         </DialogFooter>
       </DialogContent>
