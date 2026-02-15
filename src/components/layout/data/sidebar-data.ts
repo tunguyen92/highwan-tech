@@ -15,6 +15,7 @@ import {
   Users,
   Wrench,
   FolderDown,
+  Receipt,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -98,6 +99,11 @@ export const sidebarData: SidebarData = {
           title: 'Payslips',
           url: '/payslips',
           icon: FolderDown,
+        },
+        {
+          title: 'Invoices',
+          url: '/invoices',
+          icon: Receipt,
         },
         // {
         //   title: 'Auth',
