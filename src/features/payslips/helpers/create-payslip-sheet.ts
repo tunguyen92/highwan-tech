@@ -161,10 +161,18 @@ export const exportSalarySlip = async (
   const sheet = workbook.getWorksheet(1)
   if (!sheet) throw new Error('Worksheet missing')
 
-  const month = String(employee.month).padStart(2, '0')
-  const year = employee.year
+  const monthNum = parseInt(employee.month, 10)
+  const yearNum = parseInt(employee.year, 10)
 
-  sheet.getCell('C2').value = `BẢNG LƯƠNG CÁ NHÂN THÁNG ${month}/${year}`
+  const prevMonthNum = monthNum === 1 ? 12 : monthNum - 1
+  const prevYearNum = monthNum === 1 ? yearNum - 1 : yearNum
+
+  const fmt = (n: number) => String(n).padStart(2, '0')
+
+  sheet.getCell('C2').value =
+    `BẢNG LƯƠNG CÁ NHÂN THÁNG ${fmt(monthNum)}/${yearNum}`
+  sheet.getCell('C3').value =
+    `Từ 26/${fmt(prevMonthNum)}/${prevYearNum} đến 25/${fmt(monthNum)}/${yearNum}`
   sheet.getCell('D4').value = employee['Họ và tên']
   sheet.getCell('D5').value = employee['Ngày sinh']
   sheet.getCell('D6').value = employee['Chức vụ']
@@ -178,7 +186,7 @@ export const exportSalarySlip = async (
 
   const buffer = await workbook.xlsx.writeBuffer()
   const fileName =
-    `Phiếu lương ${employee['Họ và tên']}_${month}-${year}.xlsx`.replace(
+    `Phiếu lương ${employee['Họ và tên']}_${employee.month}-${employee.year}.xlsx`.replace(
       /[\\/:*?"<>|]/g,
       '-'
     )
