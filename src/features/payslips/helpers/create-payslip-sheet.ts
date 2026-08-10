@@ -24,6 +24,8 @@ export interface PayslipData {
   'BHXH 8%': number
   'BHYT 1.5%': number
   'BHTN 1%': number
+  'Công đoàn': number | null
+  'Thuế TNCN': number
   'Số ngày làm việc trong tháng': number
   'Số ngày làm việc thực tế (ngày)': number
   'Số ngày tăng ca/2 tiếng': number
@@ -38,7 +40,7 @@ export interface PayslipData {
   'Tổng tiền cơm tăng ca': number
   'Tiền điện thoại': number
   'National Holiday Fee': number
-  'Monthly Off Fee (1 Day)': number
+  'Monthly Off Fee': number
   'Processing Fee': number
   'Thưởng tết 2026 (Bonus 2026)': number
   'Tổng lương CB+PC': number
@@ -46,9 +48,8 @@ export interface PayslipData {
   'BẢN THÂN VÀ NGƯỜI PHỤ THUỘC (4.400.000/1 NGƯỜI)': number
   'THU NHẬP CHỊU THUẾ': number
   'THU NHẬP TÍNH THUẾ': number
-  'Tổng BHXH': number
-  'Công đoàn': number | null
   'THUẾ TNCN': number
+  'Tổng BHXH': number
   'Tổng lương thực lãnh': number
   month: string
   year: string
@@ -115,7 +116,7 @@ const ALLOWANCE_ROWS: RowConfig[] = [
   { col: 'E', value: 'Tổng tiền tăng ca' },
   { col: 'E', value: 'Tổng tiền cơm tăng ca' },
   { col: 'E', value: 'Tổng tiền cơm trưa' },
-  { col: 'E', value: 'Monthly Off Fee (1 Day)' },
+  { col: 'E', value: 'Monthly Off Fee' },
   { col: 'E', value: 'National Holiday Fee' },
   { col: 'E', value: 'Processing Fee' },
   { col: 'E', value: 'Thưởng tết 2026 (Bonus 2026)' },
@@ -126,7 +127,7 @@ const ALLOWANCE_ROWS: RowConfig[] = [
       e['Tổng tiền tăng ca'] +
       e['Tổng tiền cơm tăng ca'] +
       e['Tổng tiền cơm trưa'] +
-      e['Monthly Off Fee (1 Day)'] +
+      e['Monthly Off Fee'] +
       e['National Holiday Fee'] +
       e['Processing Fee'] +
       e['Thưởng tết 2026 (Bonus 2026)'],

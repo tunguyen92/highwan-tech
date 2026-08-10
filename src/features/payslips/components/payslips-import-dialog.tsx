@@ -91,7 +91,11 @@ export function PayslipsImportDialog({
         defval: 0,
       }) as PayslipData[]
 
-      await exportPayslipZip({ data: jsonData })
+      const normalizedData = jsonData.filter((row) => {
+        return typeof row['Họ và tên'] !== 'number'
+      })
+
+      await exportPayslipZip({ data: normalizedData })
     } catch (err) {
       // keep simple: log and continue; caller can surface UI errors later
       // eslint-disable-next-line no-console
