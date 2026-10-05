@@ -125,6 +125,7 @@ const ALLOWANCE_ROWS: RowConfig[] = [
   { col: 'E', value: 'Monthly Off Fee' },
   { col: 'E', value: 'National Holiday Fee' },
   { col: 'E', value: 'Processing Fee' },
+  { col: 'E', value: 'Bù lương' },
   { col: 'E', value: 'Thưởng Tết' },
   { col: 'E', value: 'Support 50%' },
   {
@@ -139,6 +140,7 @@ const ALLOWANCE_ROWS: RowConfig[] = [
       e['Monthly Off Fee'] +
       e['National Holiday Fee'] +
       e['Processing Fee'] +
+      e['Bù lương'] +
       e['Thưởng Tết'] +
       e['Support 50%'],
   },
@@ -191,9 +193,9 @@ export const exportSalarySlip = async (
 
   fillSection(sheet, employee, 10, SALARY_ROWS)
   fillSection(sheet, employee, 26, ALLOWANCE_ROWS)
-  fillSection(sheet, employee, 36, DEDUCTION_ROWS)
+  fillSection(sheet, employee, 40, DEDUCTION_ROWS)
 
-  sheet.getCell('E46').value = employee['Họ và tên']
+  sheet.getCell('E50').value = employee['Họ và tên']
 
   const buffer = await workbook.xlsx.writeBuffer()
   const fileName =

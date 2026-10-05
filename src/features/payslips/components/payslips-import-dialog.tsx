@@ -135,6 +135,7 @@ export function PayslipsImportDialog({
                       accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel'
                       {...fileRef}
                       className='h-8 py-0'
+                      disabled={loading}
                     />
                   </FormControl>
                   <FormMessage />

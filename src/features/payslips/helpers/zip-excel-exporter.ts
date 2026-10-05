@@ -13,6 +13,9 @@ export async function exportPayslipZip({
 }: ExportPayslipZipOptions): Promise<void> {
   if (!data || data.length === 0) return
 
+  // console.log(data);
+  // debugger;
+
   const zip = new JSZip()
 
   for (const item of data) {
