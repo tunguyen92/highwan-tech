@@ -36,13 +36,17 @@ export interface PayslipData {
   'Nghỉ phép năm': number
   'Số ngày cơm trưa': number
   'Tổng tiền cơm trưa': number
-  'Tổng tiền tăng ca': number
+  'Tổng tiền tăng ca (Normal day 150%)': number
+  'Tổng tiền tăng ca (Sunday 200%)': number
+  'Tổng tiền tăng ca (Holiday 300%)': number
   'Tổng tiền cơm tăng ca': number
   'Tiền điện thoại': number
   'National Holiday Fee': number
   'Monthly Off Fee': number
   'Processing Fee': number
-  'Thưởng tết 2026 (Bonus 2026)': number
+  'Bù lương': number
+  'Thưởng Tết': number
+  'Support 50%': number
   'Tổng lương CB+PC': number
   'TỔNG THU NHẬP': number
   'BẢN THÂN VÀ NGƯỜI PHỤ THUỘC (4.400.000/1 NGƯỜI)': number
@@ -113,24 +117,30 @@ const SALARY_ROWS: RowConfig[] = [
 
 const ALLOWANCE_ROWS: RowConfig[] = [
   { col: 'E', value: 'Tiền điện thoại' },
-  { col: 'E', value: 'Tổng tiền tăng ca' },
-  { col: 'E', value: 'Tổng tiền cơm tăng ca' },
   { col: 'E', value: 'Tổng tiền cơm trưa' },
+  { col: 'E', value: 'Tổng tiền tăng ca (Normal day 150%)' },
+  { col: 'E', value: 'Tổng tiền tăng ca (Sunday 200%)' },
+  { col: 'E', value: 'Tổng tiền tăng ca (Holiday 300%)' },
+  { col: 'E', value: 'Tổng tiền cơm tăng ca' },
   { col: 'E', value: 'Monthly Off Fee' },
   { col: 'E', value: 'National Holiday Fee' },
   { col: 'E', value: 'Processing Fee' },
-  { col: 'E', value: 'Thưởng tết 2026 (Bonus 2026)' },
+  { col: 'E', value: 'Thưởng Tết' },
+  { col: 'E', value: 'Support 50%' },
   {
     col: 'E',
     value: (e) =>
       e['Tiền điện thoại'] +
-      e['Tổng tiền tăng ca'] +
-      e['Tổng tiền cơm tăng ca'] +
       e['Tổng tiền cơm trưa'] +
+      e['Tổng tiền tăng ca (Normal day 150%)'] +
+      e['Tổng tiền tăng ca (Sunday 200%)'] +
+      e['Tổng tiền tăng ca (Holiday 300%)'] +
+      e['Tổng tiền cơm tăng ca'] +
       e['Monthly Off Fee'] +
       e['National Holiday Fee'] +
       e['Processing Fee'] +
-      e['Thưởng tết 2026 (Bonus 2026)'],
+      e['Thưởng Tết'] +
+      e['Support 50%'],
   },
 ]
 
